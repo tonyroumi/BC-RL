@@ -1,1 +1,10 @@
 carla
+dataset/weather-*/
+dataset/dataset_index.txt
+blocked_stat.txt
+blocked_routes.txt
+dataset.txt
+dataset_index.txt
+data_collection/bashs
+data_collection/yamls
+data_collection/batch_run
