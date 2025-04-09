@@ -1,8 +1,10 @@
 ---
 name: Feature Report
+about: Report a feature
 title: "[Feature]: "
 labels: enhancement
 assignees: ''
+
 ---
 
 **Describe the Feature** 
@@ -18,6 +20,3 @@ assignees: ''
 1. 
 
 **Testing**
-
-
-

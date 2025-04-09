@@ -1,8 +1,10 @@
 ---
 name: Bug Report
+about: Report a Bug
 title: "[Bug]: "
 labels: bug
 assignees: ''
+
 ---
 
 **Describe the bug** 
@@ -17,4 +19,3 @@ Steps to reproduce the behavior:
 
 
 **Screenshots**
-
