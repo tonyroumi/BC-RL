@@ -18,10 +18,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.plugins import DDPPlugin
 
-import perception
-import dataset
-
-from perception import Fuser
+from models.perception import Fuser
 from dataset import CarlaDataset
   
 
@@ -305,7 +302,15 @@ class Perception_planner(pl.LightningModule):
     def __init__(self, args):
         super().__init__()
         self.args = args
-        self.model = Fuser()
+        self.model = Fuser(
+            enc_depth=6,
+            dec_depth=6,
+            embed_dim=256,
+            rgb_backbone_name="r50",
+            lidar_backbone_name="r18",
+            waypoints_pred_head="gru",
+            
+        )
     
     def forward(self, batch):
         pass

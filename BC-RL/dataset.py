@@ -6,6 +6,38 @@ import json
 import numpy as np
 from PIL import Image
 from torchvision import transforms
+from utils.aug_utils import get_rgb_transform, get_center_transform, get_multi_view_transform
+
+def get_rgb_transform(size=224):
+    """
+    Creates a composition of image transforms for RGB images.
+    
+    Args:
+        size (int): Target size for resize and crop operations
+        
+    Returns:
+        transforms.Compose: Composed transformation pipeline
+    """
+    return transforms.Compose([
+        transforms.Resize(size),  # Resize2FixedSize equivalent
+        transforms.RandomResizedCrop(  # RandomResize equivalent
+            size=size,
+            scale=(0.8, 1.0),  # You might want to adjust these values
+            ratio=(0.9, 1.1)
+        ),
+        transforms.ColorJitter(
+            brightness=(0.9, 1.1),
+            contrast=(0.9, 1.1),
+            saturation=(0.9, 1.1),
+            hue=(-0.1, 0.1)
+        ),
+        transforms.CenterCrop(size),
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=[0.4850, 0.4560, 0.4060],
+            std=[0.2290, 0.2240, 0.2250]
+        )
+    ])
 
 def lidar_to_histogram_features(lidar, crop=256):
     """
@@ -106,6 +138,11 @@ class CarlaDataset(BaseIODataset):
         self.input_lidar_size = input_lidar_size
         self.input_rgb_size = input_rgb_size
 
+
+        self.rgb_transform = get_rgb_transform(size=self.input_rgb_size)
+        self.center_transform = get_center_transform(size=self.input_rgb_size)
+        self.multi_view_transform = get_multi_view_transform(size=self.input_rgb_size)
+
         self.route_frames = []
 
         dataset_indexs = self._load_text(os.path.join(root_path, 'dataset_index.txt')).split('\n')
@@ -145,10 +182,6 @@ class CarlaDataset(BaseIODataset):
             os.path.join(route_dir, "rgb_right", "%04d.jpg" % frame_id)
         )
 
-        # Convert images to tensors
-        rgb_image = self.to_tensor(rgb_image)
-        rgb_left_image = self.to_tensor(rgb_left_image)
-        rgb_right_image = self.to_tensor(rgb_right_image)
 
         measurements = self._load_json(
             os.path.join(route_dir, "measurements_full", "%04d.json" % frame_id)
@@ -238,21 +271,30 @@ class CarlaDataset(BaseIODataset):
             command_waypoints[np.isnan(command_waypoints)] = 0
         command_waypoints = torch.from_numpy(command_waypoints).float()
 
-        data["rgb_center"] = rgb_image
+     
+        rgb_main_image = self.rgb_transform(rgb_image)
+        data['rgb'] = rgb_main_image
+
+       
+        rgb_center_image = self.center_transform(rgb_image)
+        data['rgb_center'] = rgb_center_image
+
+       
+        rgb_left_image = self.multi_view_transform(rgb_left_image)
+        rgb_right_image = self.multi_view_transform(rgb_right_image)
+
+        data['rgb_left'] = rgb_left_image
+        data['rgb_right'] = rgb_right_image
 
         data["lidar"] = lidar_processed
-
-        data["rgb"] = rgb_image
-        data["rgb_left"] = rgb_left_image
-        data["rgb_right"] = rgb_right_image
 
         return (
             data,
             (
-                torch.tensor(command_waypoints),
-                torch.tensor(is_junction),
-                torch.tensor(traffic_light_state),
-                torch.tensor(stop_sign),
+                command_waypoints,
+                is_junction,
+                traffic_light_state,
+                stop_sign,
             )
         )
         

@@ -10,3 +10,6 @@ data_collection/yamls
 data_collection/batch_run
 birdview_v2_cache
 .vscode/
+__pycache__/
+lightning_logs/
+birdview_v2_cache/
