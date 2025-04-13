@@ -1,8 +1,10 @@
 ---
 name: Research Report
+about: Report research todo
 title: "[Research]: "
 labels: documentation
 assignees: ''
+
 ---
 
 **Describe the Research** 
@@ -13,9 +15,4 @@ assignees: ''
 **Purpose** 
 
 
-**Expected outcome:**
-
-
-
-
-
+**Expected outcome**
